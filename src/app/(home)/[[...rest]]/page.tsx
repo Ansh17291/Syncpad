@@ -1,19 +1,18 @@
 // app/page.tsx or wherever your Home component is
 "use client"
-import { useQuery } from "convex/react";
-import {Navbar} from "../navbar"
+import { usePaginatedQuery } from "convex/react";
+import { Navbar } from "../navbar"
 import TemplatesGallery from "../template-gallery";
 import { api } from "../../../../convex/_generated/api";
+import { DocumentsTable } from "../documents-table";
 
 const Home = () => {
 
-  const documents = useQuery(api.documents.get)
+  const { results,
+    status,
+    loadMore,
+  } = usePaginatedQuery(api.documents.get, {}, { initialNumItems: 5 })
 
-  if(documents === undefined){
-    return(
-      <p>Loading ... </p>
-    )
-  }
 
 
   return (
@@ -23,9 +22,12 @@ const Home = () => {
       </div>
       <div className="mt-16">
         <TemplatesGallery />
-        {documents?.map((document)=>(
-          <span key={document._id}>{document.title}</span>
-        ))}
+        <DocumentsTable
+          documents={results}
+          laodMore={loadMore}
+          status={status}
+        />
+
       </div>
     </div>
   );
