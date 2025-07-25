@@ -2,7 +2,7 @@ import React from 'react'
 import Link from "next/link";
 import Image from "next/image"
 import {SearchInput} from "./search-input"
-import { UserButton } from '@clerk/nextjs';
+import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
 
 export const Navbar = () => {
   return (
@@ -13,9 +13,17 @@ export const Navbar = () => {
             </Link>
             <h3 className="text-xl"> Docs </h3>
         </div>
-
         <SearchInput/>
-        <UserButton/>
+        <div className='flex gap-3 items-center pl-6'>
+          <OrganizationSwitcher
+            afterCreateOrganizationUrl= "/"
+            afterLeaveOrganizationUrl='/'
+            afterSelectOrganizationUrl="/"
+            afterSelectPersonalUrl = "/"
+            
+          />
+          <UserButton/>
+        </div>
     </nav>
   )
 }

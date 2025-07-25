@@ -4,6 +4,7 @@ import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,7 +28,9 @@ export default function RootLayout({
         >
           <NuqsAdapter>
             <ConvexClientProvider>
-              {children}
+              <Toaster/>
+
+                {children}
             </ConvexClientProvider>
           </NuqsAdapter>
         </body>

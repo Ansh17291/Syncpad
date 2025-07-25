@@ -4,14 +4,23 @@ import {SiGoogledocs} from "react-icons/si";
 import {Building2Icon, CircleUserIcon, MoreVertical} from "lucide-react"
 import {format} from "date-fns";
 import { Button } from "@/components/ui/button";
+import { DocumentMenu } from "./document-menu";
+import {useRouter} from "next/navigation";
 
 interface DocumentRowProps {
     document : Doc<"documents">;
 }
 
 export const DocumentRow = ({document} : DocumentRowProps)=>{
+    const router = useRouter();
+    // const onNewTabClick = (id: String) =>{
+    //     window.open(`/documents/${id}`, "_blank");
+    // }
+
+
     return (
         <TableRow
+        onClick ={() => router.push(`/documents/${document._id}`)}
         className="cursor-pointer"
         >
 
@@ -33,9 +42,12 @@ export const DocumentRow = ({document} : DocumentRowProps)=>{
             </TableCell>
 
             <TableCell className="flex justify-end">
-                <Button variant="ghost" size = "icon" className="rounded-full">
-                    <MoreVertical className="size-4" />
-                </Button>
+                <DocumentMenu 
+                documentId = {document._id}
+                title = {document.title}
+                OnNewTab = {()=> window.open(`/documents/${document._id}`, "_blank")}
+
+                />
             </TableCell>
 
         </TableRow>

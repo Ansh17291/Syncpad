@@ -2,7 +2,7 @@ import {parseAsString, useQueryState} from "nuqs"
 
 export function useSearchParams(){
     return useQueryState(
-        "search"    ,
+        "search",
         parseAsString.withDefault("").withOptions({clearOnDefault: true})
 
     )
