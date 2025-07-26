@@ -18,10 +18,13 @@ import HighLight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link"
 import TextAlign from "@tiptap/extension-text-align"
 
+import {useLiveblocksExtension} from "@liveblocks/react-tiptap"
+
 
 import { LineHeightExtension } from "@/extensions/line-height"
 import { FontSizeExtension } from "@/extensions/font-size" // our new custom made extension
 import Ruler from "./ruler"
+import { Threads } from "./threads"
 
 // import Ruler from "./ruler"
 
@@ -30,7 +33,11 @@ import Ruler from "./ruler"
 
 
 export const Editor = () => {
+
+  const liveblocks = useLiveblocksExtension();
   const {setEditor} = useEditorStore();
+
+
     const editor = useEditor({
       // this is onCreate .. whenever a button/tiptap thing is created pass it to the setEditor which uses Zustand so that that paticular thing is aviable everywhere and we need to pass it down the components 
 
@@ -71,7 +78,10 @@ export const Editor = () => {
             },
         },
         extensions: [
-            StarterKit, 
+            liveblocks,
+            StarterKit.configure({
+              history: false,
+            }), 
             LineHeightExtension.configure({
               types: ['heading', "paragraph"],
               defaultLineHeight: "normal"
@@ -117,6 +127,7 @@ export const Editor = () => {
         <div className="min-w-max flex justify-center w-[816px]  py-4 print:py-0 mx-auto print:w-full print:min-w-0">
 
             <EditorContent editor={editor}/>
+            <Threads editor={editor}/>
 
         </div>
     </div>
