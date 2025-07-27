@@ -2,15 +2,15 @@ import { Editor } from './editor';
 import Navbar from './navbar';
 import { Room } from './room';
 import { Toolbar } from './tolbar';
+import {Preloaded} from "convex/react"
+import {api} from "../../../../convex/_generated/api";
 
-
-interface DocumentIdPagePorps {
-    params: Promise<{ documentId: string }>;
+interface DocumentPorps {
+    preloadedDocument: Preloaded<typeof api.document.getById>;
 };
 
-const DocumentIdPage = async ({ params }: DocumentIdPagePorps) => {
+export const Document = async ({ preloadedDocument }: DocumentPorps) => {
     // throw new Error("oops");
-    const { documentId } = await params;
 
     return (    
         <Room>
@@ -28,5 +28,3 @@ const DocumentIdPage = async ({ params }: DocumentIdPagePorps) => {
         </Room>
     )
 }
-
-export default DocumentIdPage

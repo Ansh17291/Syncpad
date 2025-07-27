@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   LiveblocksProvider,
   RoomProvider,
@@ -8,21 +8,75 @@ import {
 } from "@liveblocks/react/suspense";
 import { useParams } from "next/navigation";
 import { FullScreenLoader } from "@/components/fullscreen-loader";
+import { getUsers , getDocuments} from "./actions";
+import { toast } from "sonner";
+import {Id} from "../../../../convex/_generated/dataModel"
 
 type User = {id: string, name : string, avatar : string}
 
 export function Room({ children }: { children: ReactNode }) {
     const params = useParams();
-    const [user, setUser] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    
+    const fetchUsers = useMemo(
+      ()=> async () =>{
+        try{
+          const list = await getUsers();
+          setUsers(list);
+        }catch(error){
+          toast.error(`Failed to Fecth the users :${error}`);
+        }
+      }, [],
+    );
+
+    useEffect(()=>{
+      fetchUsers();
+    }, [fetchUsers]);
   return (
     <LiveblocksProvider 
       throttle={16}
-      authEndpoint="/api/liveblocks-auth"  
-      resolveUsers = {()=> []}  
-      resolveMentionSuggestions = {()=> []}
-      resolveRoomsInfo= {()=> []}
+      authEndpoint={async () =>{
+        const endpoint = "/api/liveblocks-auth";
+        const room = params.documentId as string
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify({room})
+        })
+
+
+        return await response.json()
+      }}  
+      resolveUsers = {({userIds})=>{
+        return userIds.map(
+          (userId) => users.find((user)=> user.id === userId) ?? undefined
+        )
+      }}  
+      resolveMentionSuggestions = {({text})=> {
+        let filteredUsers = users;
+
+        if(text) {
+          filteredUsers = users.filter((user)=>
+            user.name.toLowerCase().includes(text.toLowerCase())
+          )
+        }
+
+        return filteredUsers.map((user)=> user.id);
+      }}
+
+      resolveRoomsInfo= {async ({roomIds})=>{
+        const documents = await getDocuments(roomIds as Id<"documents">[]);
+
+        return documents.map((document)=>({
+          id : document.id,
+          name : document.name,
+        }))
+      }}
     >
-      <RoomProvider id={params.documentId as string}>
+      <RoomProvider
+        id={params.documentId as string}
+        initialStorage={{leftMargin: 56, rightMargin: 50}}
+      >
         <ClientSideSuspense fallback={<FullScreenLoader label="Room Loading ..." />}>
           {children}
         </ClientSideSuspense>

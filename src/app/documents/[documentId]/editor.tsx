@@ -25,6 +25,7 @@ import { LineHeightExtension } from "@/extensions/line-height"
 import { FontSizeExtension } from "@/extensions/font-size" // our new custom made extension
 import Ruler from "./ruler"
 import { Threads } from "./threads"
+import { useStorage } from "@liveblocks/react"
 
 // import Ruler from "./ruler"
 
@@ -32,8 +33,10 @@ import { Threads } from "./threads"
 
 
 
-export const Editor = () => {
-
+export const Editor = () => {  
+  const leftMargin = useStorage((root)=> root.leftMargin ) ;
+  const rightMargin = useStorage((root)=> root.rightMargin);
+  console.log("Margins :" , leftMargin, rightMargin);
   const liveblocks = useLiveblocksExtension();
   const {setEditor} = useEditorStore();
 
@@ -72,8 +75,8 @@ export const Editor = () => {
       },
         editorProps:{
             attributes:{
-                style : "padding-left: 56px; padding-right: 56px;",
-                class: "focus:outline-none print:border-0 bg-white border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text border", 
+                style : `padding-left: ${leftMargin ?? 56}px; padding-right:${rightMargin ?? 50}px;`,
+                class: "focus:outline-none print:border-0 bg-white border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text border",   
                 spellcheck : 'true',
             },
         },
@@ -124,7 +127,7 @@ export const Editor = () => {
 
         <Ruler/>
         
-        <div className="min-w-max flex justify-center w-[816px]  py-4 print:py-0 mx-auto print:w-full print:min-w-0">
+        <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0">
 
             <EditorContent editor={editor}/>
             <Threads editor={editor}/>
