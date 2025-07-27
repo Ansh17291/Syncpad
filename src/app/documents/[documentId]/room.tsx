@@ -1,19 +1,29 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import {
   LiveblocksProvider,
   RoomProvider,
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
 import { useParams } from "next/navigation";
+import { FullScreenLoader } from "@/components/fullscreen-loader";
+
+type User = {id: string, name : string, avatar : string}
 
 export function Room({ children }: { children: ReactNode }) {
     const params = useParams();
+    const [user, setUser] = useState<User[]>([]);
   return (
-    <LiveblocksProvider publicApiKey={"pk_dev_SxgiXN2SMmevjgSUCluqDFNZxlduHe1rgaWXR7_WEl2xk96U5LyZaWlbsr57tO6x"}>
+    <LiveblocksProvider 
+      throttle={16}
+      authEndpoint="/api/liveblocks-auth"  
+      resolveUsers = {()=> []}  
+      resolveMentionSuggestions = {()=> []}
+      resolveRoomsInfo= {()=> []}
+    >
       <RoomProvider id={params.documentId as string}>
-        <ClientSideSuspense fallback={<div>Loading…</div>}>
+        <ClientSideSuspense fallback={<FullScreenLoader label="Room Loading ..." />}>
           {children}
         </ClientSideSuspense>
       </RoomProvider>
