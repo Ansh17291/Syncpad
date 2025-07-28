@@ -13,8 +13,10 @@ export async function getDocuments(ids: Id<"documents">[]) {
 export async function getUsers() {
     const {sessionClaims} = await auth();
     const clerk = await clerkClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const org_id = (sessionClaims as any)?.o?.id
     const response = await clerk.users.getUserList({
-        organizationId: [(sessionClaims as any)?.o?.id as string],
+        organizationId: [org_id as string],
     })
 
     const users = response.data.map((user)=>({

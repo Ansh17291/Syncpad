@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     console.log("Documents :" , document)
 
     const isOwner = document.ownerId === user.id;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isOrganizationMember = !!(document.organizationId &&  document.organizationId ===  (sessionClaims as any)?.o?.id);
     // const isOrganizationMember = !!(document.organizationId &&  document.organizationId ===  sessionClaims.org_id);
 
