@@ -26,18 +26,24 @@ import { FontSizeExtension } from "@/extensions/font-size" // our new custom mad
 import Ruler from "./ruler"
 import { Threads } from "./threads"
 import { useStorage } from "@liveblocks/react"
+import {LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT} from "@/constants/margins"
 
-// import Ruler from "./ruler"
-
-
-
+// import Ruler from "./ruler" -- redundant
 
 
-export const Editor = () => {  
+interface EditorProps {
+  initialContent?: string | undefined;
+} 
+
+
+export const Editor = ({initialContent}: EditorProps) => {  
   const leftMargin = useStorage((root)=> root.leftMargin ) ;
   const rightMargin = useStorage((root)=> root.rightMargin);
   console.log("Margins :" , leftMargin, rightMargin);
-  const liveblocks = useLiveblocksExtension();
+  const liveblocks = useLiveblocksExtension({
+    initialContent,
+    offlineSupport_experimental : true
+  });
   const {setEditor} = useEditorStore();
 
 
@@ -47,7 +53,7 @@ export const Editor = () => {
       // Every time the editor changes (focus, content, selection, etc.), setEditor updates the global state.
 
       // the below are the instances where we call the setEditor... so that the state is changed !!
-  
+      autofocus:true,
       onCreate({editor}) {
         setEditor(editor);
       },
@@ -75,7 +81,7 @@ export const Editor = () => {
       },
         editorProps:{
             attributes:{
-                style : `padding-left: ${leftMargin ?? 56}px; padding-right:${rightMargin ?? 50}px;`,
+                style : `padding-left: ${leftMargin ?? LEFT_MARGIN_DEFAULT}px; padding-right:${rightMargin ?? RIGHT_MARGIN_DEFAULT}px;`,
                 class: "focus:outline-none print:border-0 bg-white border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text border",   
                 spellcheck : 'true',
             },

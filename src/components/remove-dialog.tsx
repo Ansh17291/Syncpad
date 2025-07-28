@@ -15,6 +15,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import {toast} from "sonner";
+import {useRouter} from "next/navigation";
 interface RemoveDialogProps {
     documentId : Id<"documents">;
     children : React.ReactNode;   
@@ -24,6 +25,7 @@ export const RemoveDialog = ({documentId, children}: RemoveDialogProps) => {
 
     const remove = useMutation(api.documents.removeById);
     const [isRemoving, setIsRemoving] = useState(false);
+    const router = useRouter();
 
 
     return (
@@ -49,13 +51,27 @@ export const RemoveDialog = ({documentId, children}: RemoveDialogProps) => {
 
                         <AlertDialogAction
                             disabled={isRemoving}
-                            onClick={(e)=>{
-                                e.stopPropagation();
-                                setIsRemoving(true);
-                                remove({id : documentId})
-                                    .catch(() => toast.error("Not authorized"))
-                                    .then(()=> toast.success("Document removed Successfully"))
-                                    .finally(()=> setIsRemoving(false))
+                            onClick={(e) => {
+                            e.stopPropagation();
+                            setIsRemoving(true);
+
+                            remove({ id: documentId })
+                                .then(() => {
+                                toast.success("Document removed successfully");
+
+                                // Delay router push until React has time to clean up
+                                setTimeout(() => {
+                                    // window.push("/")
+                                    window.location.href = "/";
+                                    router.push("/");
+                                }, 0);
+                                })
+                                .catch(() => {
+                                toast.error("Not authorized");
+                                })
+                                .finally(() => {
+                                setIsRemoving(false);
+                                });
                             }}
                         >
                             Delete

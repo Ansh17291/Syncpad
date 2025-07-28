@@ -3,7 +3,7 @@
 import {  ConvexReactClient, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { ReactNode } from "react";
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
-import { ClerkProvider, useAuth, SignIn,  } from "@clerk/nextjs"
+import {  useAuth, SignIn,  } from "@clerk/nextjs"
 import { FullScreenLoader } from "./fullscreen-loader";
 
 
