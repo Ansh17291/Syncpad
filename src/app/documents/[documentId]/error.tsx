@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangleIcon } from "lucide-react"
 import Link from "next/link";
 
-export const Error = ({
+const Error = ({
     error, 
     reset
 }:{
@@ -55,3 +55,5 @@ export const Error = ({
         </div>
     )
 }
+
+export default Error;
