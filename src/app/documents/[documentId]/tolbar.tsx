@@ -571,6 +571,7 @@ const FontFamilyButton = () => {
 };
 
 // Mobile overflow menu component
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MobileOverflowMenu = ({ items }: { items: any[] }) => {
     if (items.length === 0) return null;
 
