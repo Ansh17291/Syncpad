@@ -4,14 +4,38 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/use-editor-store";
-import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, ChevronDownIcon, HighlighterIcon, ImageIcon, Italic, Link2Icon, ListIcon, ListOrderedIcon, ListTodoIcon, LucideIcon, MessageSquareIcon, MinusIcon, PrinterIcon, Redo2Icon, RemoveFormattingIcon, SearchIcon, SpellCheckIcon, Underline, Undo2Icon, UploadIcon, PlusIcon, ListCollapseIcon, MoreHorizontalIcon, MenuIcon } from "lucide-react";
+import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, ChevronDownIcon, HighlighterIcon, ImageIcon, Italic, Link2Icon, ListIcon, ListOrderedIcon, ListTodoIcon, LucideIcon, MessageSquareIcon, MinusIcon, PrinterIcon, Redo2Icon, RemoveFormattingIcon, SearchIcon, SpellCheckIcon, Underline, Undo2Icon, UploadIcon, PlusIcon, ListCollapseIcon, MoreHorizontalIcon } from "lucide-react";
 import { type Level } from "@tiptap/extension-heading"
 import { type ColorResult, CirclePicker, SketchPicker } from "react-color";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+const useResponsive = () => {
+    const [screenSize, setScreenSize] = useState({
+        isMobile: false,
+        isTablet: false,
+        isDesktop: false
+    });
+
+    useEffect(() => {
+        const checkScreenSize = () => {
+            const width = window.innerWidth;
+            setScreenSize({
+                isMobile: width < 640,
+                isTablet: width >= 640 && width < 1024,
+                isDesktop: width >= 1024
+            });
+        };
+
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
+
+    return screenSize;
+};
 
 const LineHeightButton = () => {
     const {editor} = useEditorStore();
@@ -548,10 +572,12 @@ const FontFamilyButton = () => {
 
 // Mobile overflow menu component
 const MobileOverflowMenu = ({ items }: { items: any[] }) => {
+    if (items.length === 0) return null;
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="h-8 w-8 shrink-0 flex items-center justify-center rounded-md hover:bg-neutral-200/80 transition-colors md:hidden">
+                <button className="h-8 w-8 shrink-0 flex items-center justify-center rounded-md hover:bg-neutral-200/80 transition-colors">
                     <MoreHorizontalIcon className="size-4" />
                 </button>
             </DropdownMenuTrigger>
@@ -609,6 +635,7 @@ const ToolbarButton = ({
 
 export const Toolbar = () => {
     const { editor } = useEditorStore();
+    const { isMobile, isTablet, isDesktop } = useResponsive();
 
     const primaryActions = [
         {
@@ -679,97 +706,162 @@ export const Toolbar = () => {
         }
     ];
 
+    // Items that will be moved to overflow menu based on screen size
+    const getOverflowItems = () => {
+        const items = [];
+
+        if (isMobile) {
+            // On mobile, move font family and heading to overflow
+            items.push(
+                {
+                    label: "Font Family",
+                    icon: () => <span className="text-xs font-bold">Aa</span>,
+                    onClick: () => {}, // This would need to trigger FontFamilyButton dropdown
+                },
+                {
+                    label: "Heading",
+                    icon: () => <span className="text-xs font-bold">H1</span>,
+                    onClick: () => {}, // This would need to trigger HeadingLevelButton dropdown
+                }
+            );
+        }
+
+        if (isMobile || isTablet) {
+            // On mobile and tablet, move color controls to overflow
+            items.push(
+                {
+                    label: "Text Color",
+                    icon: () => <span className="text-xs font-bold" style={{ color: editor?.getAttributes("textStyle").color || "#000000" }}>A</span>,
+                    onClick: () => {}, // This would need to trigger TextColorButton dropdown
+                },
+                {
+                    label: "Highlight",
+                    icon: HighlighterIcon,
+                    onClick: () => {}, // This would need to trigger HightLightColorButton dropdown
+                }
+            );
+        }
+
+        if (isMobile) {
+            // On mobile, move media and alignment controls to overflow
+            items.push(
+                {
+                    label: "Link",
+                    icon: Link2Icon,
+                    onClick: () => {}, // This would need to trigger LinkButton dropdown
+                },
+                {
+                    label: "Image",
+                    icon: ImageIcon,
+                    onClick: () => {}, // This would need to trigger ImageButton dropdown
+                },
+                {
+                    label: "Align",
+                    icon: AlignLeftIcon,
+                    onClick: () => {}, // This would need to trigger AlignButton dropdown
+                },
+                {
+                    label: "Line Height",
+                    icon: ListCollapseIcon,
+                    onClick: () => {}, // This would need to trigger LineHeightButton dropdown
+                },
+                {
+                    label: "Lists",
+                    icon: ListIcon,
+                    onClick: () => {}, // This would need to trigger ListButton dropdown
+                }
+            );
+        }
+
+        // Add secondary actions to overflow on smaller screens
+        if (isMobile) {
+            items.push(...secondaryActions);
+        }
+
+        return items;
+    };
+
     return (
-        <div className="w-full bg-gray border-b border-neutral-200 px-4 py-2 rounded-[20px]">
-            <div className="flex items-center gap-2 w-full justify-around">
+        <div className="w-full bg-white border-b border-neutral-200 px-2 sm:px-4 py-2 rounded-[20px]">
+            <div className="flex items-center gap-1 sm:gap-2 w-full overflow-x-auto">
                 {/* Primary actions - always visible */}
-                {/* <div className="flex items-center gap-1"> */}
+                <div className="flex items-center gap-1">
                     {primaryActions.map((item) => (
                         <ToolbarButton key={item.label} {...item} />
                     ))}
-                {/* </div> */}
+                </div>
 
-                <Separator orientation="vertical" className="h-6 bg-neutral-300" />
+                <Separator orientation="vertical" className="h-6 bg-neutral-300 shrink-0" />
 
                 {/* Font controls - responsive layout */}
-                {/* <div className="flex items-center gap-2 flex-1 min-w-0"> */}
-                    <div className="hidden sm:block">
+                {!isMobile && (
+                    <div className="flex items-center gap-1">
                         <FontFamilyButton />
+                        {isDesktop && <HeadingLevelButton />}
                     </div>
-                    
-                    <div className="hidden md:block">
-                        <HeadingLevelButton />
-                    </div>
-                    
-                    <FontSizeButton />
-                {/* </div> */}
+                )}
+                
+                <FontSizeButton />
 
-                <Separator orientation="vertical" className="h-6 bg-neutral-300 hidden sm:block" />
+                <Separator orientation="vertical" className="h-6 bg-neutral-300 shrink-0" />
 
-                {/* Format actions */}
-                {/* <div className="flex items-center gap-2"> */}
+                {/* Format actions - always visible */}
+                <div className="flex items-center gap-1">
                     {formatActions.map((item) => (
                         <ToolbarButton key={item.label} {...item} />
                     ))}
-                {/* </div> */}
+                </div>
 
-                <Separator orientation="vertical" className="h-6 bg-neutral-300 hidden md:block" />
+                {/* Color controls - hide on mobile and tablet */}
+                {isDesktop && (
+                    <>
+                        <Separator orientation="vertical" className="h-6 bg-neutral-300 shrink-0" />
+                        <div className="flex items-center gap-1">
+                            <TextColorButton />
+                            <HightLightColorButton />
+                        </div>
+                    </>
+                )}
 
-                {/* Color controls - hide on small screens */}
-                {/* <div className="hidden md:flex items-center gap-1"> */}
-                    <TextColorButton />
-                    <HightLightColorButton />
-                {/* </div> */}
+                {/* Media and alignment - hide on mobile */}
+                {!isMobile && (
+                    <>
+                        <Separator orientation="vertical" className="h-6 bg-neutral-300 shrink-0" />
+                        <div className="flex items-center gap-1">
+                            <LinkButton />
+                            <ImageButton />
+                            <AlignButton />
+                            <LineHeightButton />
+                            <ListButton />
+                        </div>
+                    </>
+                )}
 
-                <Separator orientation="vertical" className="h-6 bg-neutral-300 hidden lg:block" />
+                {/* Secondary actions - show some on desktop, others in overflow */}
+                {isDesktop && (
+                    <>
+                        <Separator orientation="vertical" className="h-6 bg-neutral-300 shrink-0" />
+                        <div className="flex items-center gap-1">
+                            <ToolbarButton 
+                                icon={MessageSquareIcon}
+                                onClick={() => editor?.chain().focus().addPendingComment().run()}
+                                isActive={editor?.isActive("liveblocksCommentMark")}
+                            />
+                            <ToolbarButton 
+                                icon={ListTodoIcon}
+                                onClick={() => editor?.chain().focus().toggleTaskList().run()}
+                                isActive={editor?.isActive("taskList")}
+                            />
+                            <ToolbarButton 
+                                icon={RemoveFormattingIcon}
+                                onClick={() => editor?.chain().focus().unsetAllMarks().run()}
+                            />
+                        </div>
+                    </>
+                )}
 
-                {/* Media and alignment - progressive disclosure */}
-                {/* <div className="hidden lg:flex items-center gap-1"> */}
-                    <LinkButton />
-                    <ImageButton />
-                    <AlignButton />
-                    <LineHeightButton />
-                    <ListButton />
-                {/* </div> */}
-
-                {/* Always show some secondary actions */}
-                {/* <div className="hidden sm:flex items-center gap-1"> */}
-                    <ToolbarButton 
-                        icon={MessageSquareIcon}
-                        onClick={() => editor?.chain().focus().addPendingComment().run()}
-                        isActive={editor?.isActive("liveblocksCommentMark")}
-                    />
-                    <ToolbarButton 
-                        icon={RemoveFormattingIcon}
-                        onClick={() => editor?.chain().focus().unsetAllMarks().run()}
-                    />
-                {/* </div> */}
-
-                {/* Overflow menu for mobile */}
-                <MobileOverflowMenu items={[
-                    ...(window.innerWidth < 640 ? [
-                        { label: "Font Family", icon: () => <span className="text-xs">Aa</span>, onClick: () => {} },
-                        { label: "Heading", icon: () => <span className="text-xs">H1</span>, onClick: () => {} }
-                    ] : []),
-                    ...(window.innerWidth < 768 ? [
-                        { label: "Text Color", icon: () => <span className="text-xs font-bold">A</span>, onClick: () => {} },
-                        { label: "Highlight", icon: HighlighterIcon, onClick: () => {} }
-                    ] : []),
-                    ...(window.innerWidth < 1024 ? [
-                        { label: "Link", icon: Link2Icon, onClick: () => {} },
-                        { label: "Image", icon: ImageIcon, onClick: () => {} },
-                        { label: "Align", icon: AlignLeftIcon, onClick: () => {} },
-                        { label: "Line Height", icon: ListCollapseIcon, onClick: () => {} },
-                        { label: "Lists", icon: ListIcon, onClick: () => {} }
-                    ] : []),
-                    { label: "Print", icon: PrinterIcon, onClick: () => window.print() },
-                    { label: "Spellcheck", icon: SpellCheckIcon, onClick: () => {
-                        const dom = editor?.view.dom;
-                        if (!dom) return;
-                        const isEnabled = dom.getAttribute("spellcheck") === "true";
-                        dom.setAttribute("spellcheck", (!isEnabled).toString());
-                    }},
-                ]} />
+                {/* Overflow menu - show when there are items to overflow */}
+                <MobileOverflowMenu items={getOverflowItems()} />
             </div>
         </div>
     )
